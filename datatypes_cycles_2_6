@@ -1,0 +1,70 @@
+# Задание 6: Расчет ингредиентов для рецептов
+
+# Исходные данные (книга рецептов)
+cook_book = {
+    'салат': [
+        {'ingridient_name': 'сыр', 'quantity': 50, 'measure': 'гр'},
+        {'ingridient_name': 'томаты', 'quantity': 2, 'measure': 'шт'},
+        {'ingridient_name': 'огурцы', 'quantity': 20, 'measure': 'гр'},
+        {'ingridient_name': 'маслины', 'quantity': 10, 'measure': 'гр'},
+        {'ingridient_name': 'оливковое масло', 'quantity': 20, 'measure': 'мл'},
+        {'ingridient_name': 'салат', 'quantity': 10, 'measure': 'гр'},
+        {'ingridient_name': 'перец', 'quantity': 20, 'measure': 'гр'}
+    ],
+    'пицца': [
+        {'ingridient_name': 'сыр', 'quantity': 20, 'measure': 'гр'},
+        {'ingridient_name': 'колбаса', 'quantity': 30, 'measure': 'гр'},
+        {'ingridient_name': 'бекон', 'quantity': 30, 'measure': 'гр'},
+        {'ingridient_name': 'оливки', 'quantity': 10, 'measure': 'гр'},
+        {'ingridient_name': 'томаты', 'quantity': 20, 'measure': 'гр'},
+        {'ingridient_name': 'тесто', 'quantity': 100, 'measure': 'гр'},
+    ],
+    'лимонад': [
+        {'ingridient_name': 'лимон', 'quantity': 1, 'measure': 'шт'},
+        {'ingridient_name': 'вода', 'quantity': 200, 'measure': 'мл'},
+        {'ingridient_name': 'сахар', 'quantity': 10, 'measure': 'гр'},
+        {'ingridient_name': 'лайм', 'quantity': 20, 'measure': 'гр'},
+    ]
+}
+
+# Запрашиваем количество порций
+portions = int(input("Введите количество порций: "))
+
+# Создаем словарь для хранения суммарных количеств ингредиентов
+# Будем использовать кортеж (название, мера) в качестве ключа
+ingredients_total = {}
+
+# Проходим по всем блюдам в книге рецептов
+for dish_name, ingredients in cook_book.items():
+    # Проходим по всем ингредиентам в текущем блюде
+    for ingredient in ingredients:
+        # Получаем данные об ингредиенте
+        name = ingredient['ingridient_name']
+        quantity = ingredient['quantity']
+        measure = ingredient['measure']
+        
+        # Рассчитываем общее количество для заданного числа порций
+        total_quantity = quantity * portions
+        
+        # Создаем уникальный ключ (название + мера)
+        # Важно: одинаковые ингредиенты с разными мерами считаем отдельно
+        key = (name, measure)
+        
+        # Если такой ингредиент уже есть, добавляем к существующему количеству
+        if key in ingredients_total:
+            ingredients_total[key] += total_quantity
+        # Иначе создаем новую запись
+        else:
+            ingredients_total[key] = total_quantity
+
+# Выводим результат
+print("\nРезультат:")
+
+# Сортируем ингредиенты по названию для красивого вывода
+sorted_ingredients = sorted(ingredients_total.items(), key=lambda x: x[0][0])
+
+# Выводим каждый ингредиент
+for (name, measure), quantity in sorted_ingredients:
+    # Форматируем название (первая буква заглавная)
+    formatted_name = name.capitalize()
+    print(f"{formatted_name}: {quantity} {measure}")
