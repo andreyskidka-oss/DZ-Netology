@@ -15,6 +15,5 @@ stats = {'facebook': 55, 'yandex': 115, 'vk': 120, 'google': 99, 'email': 42, 'o
 max_channel = find_max_sales_channel(stats)
 print(f"Максимальный объем продаж на рекламном канале: {max_channel}")
 
-# Альтернативный способ с использованием max()
 max_channel_alt = max(stats, key=stats.get)
 print(f"Проверка (способ 2): {max_channel_alt}")
