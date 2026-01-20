@@ -1,212 +1,242 @@
-documents = [
-    {'type': 'passport', 'number': '2207 876234', 'name': 'Василий Гупкин'},
-    {'type': 'invoice', 'number': '11-2', 'name': 'Геннадий Покемонов'},
-    {'type': 'insurance', 'number': '10006', 'name': 'Аристарх Павлов'}
+# Глобальные переменные (разрешены по условию)
+books = [
+    {'genre': 'поэзия', 'number': '978-5-1000-1234-7', 'title': 'Евгений Онегин', 'author': 'Александр Пушкин'},
+    {'genre': 'фэнтези', 'number': '88006', 'title': 'Властелин колец', 'author': 'Джон Р. Р. Толкин'},
+    {'genre': 'детектив', 'number': 'D-1122', 'title': 'Безмолвный свидетель', 'author': 'Агата Кристи'}
 ]
 
 directories = {
-    '1': ['2207 876234', '11-2'],
-    '2': ['10006'],
+    '1': ['978-5-1000-1234-7', '88006'],
+    '2': ['D-1122'],
     '3': []
 }
 
-def get_document_by_number(doc_number):
-    """Находит документ по номеру"""
-    for doc in documents:
-        if doc['number'] == doc_number:
-            return doc
+# Вспомогательные функции
+def find_book_by_number(book_number):
+    """Находит книгу по номеру"""
+    for book in books:
+        if book['number'] == book_number:
+            return book
     return None
 
-def get_shelf_by_document_number(doc_number):
-    """Находит полку по номеру документа"""
-    for shelf, docs in directories.items():
-        if doc_number in docs:
+def find_book_by_title(book_title):
+    """Находит книгу по названию"""
+    for book in books:
+        if book['title'] == book_title:
+            return book
+    return None
+
+def find_shelf_by_book_number(book_number):
+    """Находит полку по номеру книги"""
+    for shelf, book_list in directories.items():
+        if book_number in book_list:
             return shelf
     return None
 
-def get_document_info(doc):
-    """Возвращает отформатированную информацию о документе"""
-    shelf = get_shelf_by_document_number(doc['number'])
-    return f"№: {doc['number']}, тип: {doc['type']}, владелец: {doc['name']}, полка хранения: {shelf}"
+def show_all_books():
+    """Показывает все книги с информацией о полках"""
+    print("\nТекущий список книг:")
+    for book in books:
+        shelf = find_shelf_by_book_number(book['number'])
+        print(f"№: {book['number']}, жанр: {book['genre']}, "
+              f"название: {book['title']}, автор: {book['author']}, "
+              f"полка хранения: {shelf}")
 
-# ========== КОМАНДЫ ИЗ ЗАДАНИЯ 1 ==========
-
-def command_p():
-    """Команда p - найти владельца по номеру документа"""
-    doc_number = input('Введите номер документа: ')
-    doc = get_document_by_number(doc_number)
-    if doc:
-        print(f'Владелец документа: {doc["name"]}')
+# Основные функции для команд
+def book_info():
+    """Команда 'book_info' - информация о книге по номеру"""
+    book_number = input("\nВведите номер книги: ")
+    book = find_book_by_number(book_number)
+    
+    if book:
+        print(f"\nНазвание книги: {book['title']}")
+        print(f"Автор: {book['author']}")
     else:
-        print('Документ не найден в базе')
+        print("\nКнига не найдена в базе")
 
-def command_s():
-    """Команда s - найти полку по номеру документа"""
-    doc_number = input('Введите номер документа: ')
-    shelf = get_shelf_by_document_number(doc_number)
-    if shelf:
-        print(f'Документ хранится на полке: {shelf}')
+def shelf():
+    """Команда 'shelf' - найти полку по названию книги"""
+    book_title = input("\nВведите название книги: ")
+    book = find_book_by_title(book_title)
+    
+    if not book:
+        print("\nКнига не найдена в базе")
+        return
+    
+    shelf_num = find_shelf_by_book_number(book['number'])
+    if shelf_num:
+        print(f"\nКнига хранится на полке: {shelf_num}")
     else:
-        print('Документ не найден в базе')
+        print("\nПолка для книги не найдена")
 
-def command_l():
-    """Команда l - показать все документы"""
-    for doc in documents:
-        print(get_document_info(doc))
+def all_books():
+    """Команда 'all' - показать все книги"""
+    show_all_books()
 
-def command_ads():
-    """Команда ads - добавить новую полку"""
-    shelf_number = input('Введите номер полки: ')
-    if shelf_number in directories:
-        shelves = ', '.join(sorted(directories.keys()))
-        print(f'Такая полка уже существует. Текущий перечень полок: {shelves}.')
+def add_shelf():
+    """Команда 'add_shelf' - добавить новую полку"""
+    shelf_number = input("\nВведите номер полки: ")
+    
+    # Используем setdefault() - если полка существует, ничего не меняем
+    # Если не существует - создаем пустой список
+    directories.setdefault(shelf_number, [])
+    
+    if shelf_number in directories and len(directories[shelf_number]) == 0:
+        # Если только что создали полку - сообщаем об успехе
+        print(f"\nПолка добавлена. Текущий перечень полок: {', '.join(sorted(directories.keys()))}.")
     else:
-        directories[shelf_number] = []
-        shelves = ', '.join(sorted(directories.keys()))
-        print(f'Полка добавлена. Текущий перечень полок: {shelves}.')
+        # Если полка уже была - сообщаем об этом
+        print(f"\nТакая полка уже существует. Текущий перечень полок: {', '.join(sorted(directories.keys()))}.")
 
-def command_ds():
-    """Команда ds - удалить полку"""
-    shelf_number = input('Введите номер полки: ')
+def del_shelf():
+    """Команда 'del_shelf' - удалить полку"""
+    shelf_number = input("\nВведите номер полки: ")
+    
     if shelf_number not in directories:
-        shelves = ', '.join(sorted(directories.keys()))
-        print(f'Такой полки не существует. Текущий перечень полок: {shelves}.')
+        print(f"\nТакой полки не существует. Текущий перечень полок: {', '.join(sorted(directories.keys()))}.")
     elif directories[shelf_number]:
-        shelves = ', '.join(sorted(directories.keys()))
-        print(f'На полке есть документа, удалите их перед удалением полки. Текущий перечень полок: {shelves}.')
+        print(f"\nНа полке есть книги, удалите их перед удалением полки. Текущий перечень полок: {', '.join(sorted(directories.keys()))}.")
     else:
         del directories[shelf_number]
-        shelves = ', '.join(sorted(directories.keys()))
-        print(f'Полка удалена. Текущий перечень полок: {shelves}.')
+        print(f"\nПолка удалена. Текущий перечень полок: {', '.join(sorted(directories.keys()))}.")
 
-# ========== КОМАНДЫ ИЗ ЗАДАНИЯ 2 ==========
-
-def command_ad():
-    """Команда ad - добавить новый документ"""
-    doc_number = input('Введите номер документа: ')
-    doc_type = input('Введите тип документа: ')
-    owner = input('Введите владельца документа: ')
-    shelf = input('Введите полку для хранения: ')
+def add_book():
+    """Команда 'add_book' - добавить новую книгу"""
+    book_number = input("\nВведите номер книги: ")
+    genre = input("Введите жанр книги: ")
+    title = input("Введите название книги: ")
+    author = input("Введите автора книги: ")
+    shelf = input("Введите полку для хранения: ")
     
+    # Проверяем существование полки
     if shelf not in directories:
-        print('Такой полки не существует. Добавьте полку командой as.')
-        print('Текущий список документов:')
-        for doc in documents:
-            print(get_document_info(doc))
+        print(f"\nТакой полки не существует. Добавьте полку командой add_shelf.")
+        show_all_books()
         return
     
-    # Проверяем, нет ли уже документа с таким номером
-    if get_document_by_number(doc_number):
-        print('Документ с таким номером уже существует!')
+    # Проверяем, не существует ли уже книга с таким номером
+    if find_book_by_number(book_number):
+        print("Книга с таким номером уже существует!")
         return
     
-    documents.append({
-        'type': doc_type,
-        'number': doc_number,
-        'name': owner
+    # Добавляем книгу
+    books.append({
+        'genre': genre,
+        'number': book_number,
+        'title': title,
+        'author': author
     })
-    directories[shelf].append(doc_number)
     
-    print('Документ добавлен. Текущий список документов:')
-    for doc in documents:
-        print(get_document_info(doc))
+    # Используем setdefault() для добавления на полку
+    # (хотя мы уже проверили, что полка существует)
+    directories.setdefault(shelf, []).append(book_number)
+    
+    print("\nКнига добавлена.")
+    show_all_books()
 
-def command_d():
-    """Команда d - удалить документ"""
-    doc_number = input('Введите номер документа: ')
-    doc = get_document_by_number(doc_number)
+def del_book():
+    """Команда 'del_book' - удалить книгу"""
+    book_number = input("\nВведите номер книги: ")
     
-    if not doc:
-        print('Документ не найден в базе.')
-        print('Текущий список документов:')
-        for doc in documents:
-            print(get_document_info(doc))
+    # Ищем книгу
+    book = find_book_by_number(book_number)
+    
+    if not book:
+        print("\nКнига не найдена в базе.")
+        show_all_books()
         return
     
-    # Удаляем документ из списка документов
-    documents.remove(doc)
+    # Удаляем книгу из списка книг
+    books.remove(book)
     
-    # Удаляем документ с полки
-    shelf = get_shelf_by_document_number(doc_number)
+    # Удаляем книгу с полки
+    shelf = find_shelf_by_book_number(book_number)
     if shelf:
-        directories[shelf].remove(doc_number)
+        directories[shelf].remove(book_number)
     
-    print('Документ удален.')
-    print('Текущий список документов:')
-    for doc in documents:
-        print(get_document_info(doc))
+    print("\nКнига удалена.")
+    show_all_books()
 
-def command_m():
-    """Команда m - переместить документ на другую полку"""
-    doc_number = input('Введите номер документа: ')
-    new_shelf = input('Введите номер полки: ')
+def move_book():
+    """Команда 'move' - переместить книгу на другую полку"""
+    book_number = input("\nВведите номер книги: ")
+    new_shelf = input("Введите номер полки: ")
     
-    doc = get_document_by_number(doc_number)
-    if not doc:
-        print('Документ не найден в базе.')
-        print('Текущий список документов:')
-        for doc in documents:
-            print(get_document_info(doc))
+    # Проверяем существование книги
+    book = find_book_by_number(book_number)
+    if not book:
+        print("\nКнига не найдена в базе.")
+        show_all_books()
         return
     
+    # Проверяем существование новой полки
     if new_shelf not in directories:
-        shelves = ', '.join(sorted(directories.keys()))
-        print(f'Такой полки не существует. Текущий перечень полок: {shelves}.')
+        print(f"\nТакой полки не существует. Текущий перечень полок: {', '.join(sorted(directories.keys()))}.")
         return
     
-    # Находим старую полку и удаляем оттуда документ
-    old_shelf = get_shelf_by_document_number(doc_number)
-    if old_shelf:
-        directories[old_shelf].remove(doc_number)
+    # Находим текущую полку
+    current_shelf = find_shelf_by_book_number(book_number)
     
-    # Добавляем документ на новую полку
-    directories[new_shelf].append(doc_number)
+    if current_shelf:
+        # Удаляем книгу с текущей полки
+        directories[current_shelf].remove(book_number)
     
-    print('Документ перемещен.')
-    print('Текущий список документов:')
-    for doc in documents:
-        print(get_document_info(doc))
+    # Используем setdefault() для добавления на новую полку
+    directories.setdefault(new_shelf, []).append(book_number)
+    
+    print("\nКнига перемещена.")
+    show_all_books()
 
 def main():
     """Основная функция программы"""
-    commands = {
-        'p': command_p,
-        's': command_s,
-        'l': command_l,
-        'ads': command_ads,
-        'ds': command_ds,
-        'ad': command_ad,
-        'd': command_d,
-        'm': command_m
-    }
-    
-    print('Добро пожаловать в систему учета документов!')
-    print('Доступные команды:')
-    print('p - найти владельца документа')
-    print('s - найти полку документа')
-    print('l - показать все документы')
-    print('ads - добавить полку')
-    print('ds - удалить полку')
-    print('ad - добавить документ')
-    print('d - удалить документ')
-    print('m - переместить документ')
-    print('q - выход')
-    print()
+    print("Программа для управления библиотекой")
+    print("Доступные команды:")
+    print("  book_info - информация о книге по номеру")
+    print("  shelf - найти полку по названию книги")
+    print("  all - показать все книги")
+    print("  add_shelf - добавить полку")
+    print("  del_shelf - удалить полку")
+    print("  add_book - добавить книгу")
+    print("  del_book - удалить книгу")
+    print("  move - переместить книгу")
+    print("  q - выход")
+    print("-" * 50)
     
     while True:
-        command = input('Введите команду: ').strip()
+        command = input("\nВведите команду: ").strip()
         
-        if command == 'q':
-            print('Выход из программы.')
-            break
-        
-        if command in commands:
-            print()
-            commands[command]()
-        else:
-            print('Неизвестная команда. Попробуйте снова.')
-        
-        print()  # Пустая строка для разделения команд
+        match command:
+            case "q":
+                print("\nВыход из программы.")
+                break
+            
+            case "book_info":
+                book_info()
+            
+            case "shelf":
+                shelf()
+            
+            case "all":
+                all_books()
+            
+            case "add_shelf":
+                add_shelf()
+            
+            case "del_shelf":
+                del_shelf()
+            
+            case "add_book":
+                add_book()
+            
+            case "del_book":
+                del_book()
+            
+            case "move":
+                move_book()
+            
+            case _:
+                print("\nНеизвестная команда. Попробуйте снова.")
 
+# Запуск программы
 if __name__ == "__main__":
     main()
